@@ -7,13 +7,13 @@
 
 Camera::Camera()
 {
-	screenWidth = WinApp::GetScreenWidth();
-	screenHeight = WinApp::GetScreenHeight();
-	halfWidth = (float)screenWidth * 0.5f;
-	halfHeight = (float)screenHeight * 0.5f;
+	screenWidth = WinApp::GetScreenWidthF();
+	screenHeight = WinApp::GetScreenHeightF();
+	halfWidth = screenWidth * 0.5f;
+	halfHeight = screenHeight * 0.5f;
 
 	screenBox = new AABBCollider(this, -halfWidth,  -halfHeight, halfWidth, halfHeight);
-	printf("w: %f, h: %f\n", halfWidth, halfHeight);
+	//printf("w: %f, h: %f\n", halfWidth, halfHeight);
 }
 
 Camera::~Camera()
@@ -61,7 +61,7 @@ Vector2 Camera::ScreenPositionToWorld(const Vector2& screenPos)
 
 bool Camera::IsOnScreen(AABBCollider* col)
 {
-	return col->Intersected(screenBox);
+	return CollisionManager::Intersected(col, screenBox);
 }
 
 Camera* Camera::GetCamera()

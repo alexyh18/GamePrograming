@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "tag.h"
 #include "RenderInfo.h"
+#include "InputManager.h"
 
 class GameObject
 {

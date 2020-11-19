@@ -1,39 +1,38 @@
 #include "stdafx.h"
 #include "Player.h"
+#include "TimeManager.h"
 
 
-Player::Player() :
-	GameObject(L"resources/player.png"), moveSpeed(300.0f)
+Player::Player() :GameObject(L"resources/Player1.png"), moveSpeed(300.0f), moveForce(1.0f), maxForce(30.0f)
 {
-	
+
 }
 
-void Player::Update()
+
+Player::~Player() 
+{
+
+}
+
+void Player::Update() 
 {
 	Move();
 }
 
-void Player::Move()
+void Player::Move() 
 {
 	Vector2 input;
-	if (InputManager::GetKeyState('W'))
-	{
+	if (InputManager::GetKeyPressed(VK_SPACE)) {
 		input.y += 1.0f;
+		if(moveForce<maxForce)
+			moveForce = moveForce * 1.1;
 	}
-	if (InputManager::GetKeyState('S')) {
-		input.y -= 1.0f;
-	}
-	if (InputManager::GetKeyState('D'))
-	{
-		input.x += 1.0f;
-	}
-	if (InputManager::GetKeyState('A')) {
-		input.x -= 1.0f;
-	}
-	if (input.y != 0.0f|| input.x != 0.0f) {
+	if (InputManager::GetKeyUp(VK_SPACE))
+		moveForce = 1;
+	if (input.y != 0.0f) {
+		if (transform->position.y > 500)
+			transform->position.y = -500;
 		input = input.normalized();
-		transform->position.y += moveSpeed * input.y * TimeManager::GetDeltaTime();
-		transform->position.x += moveSpeed * input.x * TimeManager::GetDeltaTime();
-
+		transform->position.y += moveSpeed * moveForce * input.y * TimeManager::GetDeltaTime();
 	}
 }

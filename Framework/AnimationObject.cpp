@@ -2,6 +2,7 @@
 #include "AnimationObject.h"
 #include "InputManager.h"
 #include "TimeManager.h"
+#include "GameScene.h"
 
 AnimationObject::AnimationObject(AnimationInfo* animInfo)
 	:GameObject(animInfo)		//'[1]'
@@ -33,6 +34,14 @@ AnimationObject::AnimationObject(AnimationInfo* animInfo)
 	animationRenderer->PushBackAnimation(testAnim2);//AnimationInfo에 애니메이션을 푸쉬백합니다.
 
 	moveSpeed = 100.0f;	//이동 테스트
+
+	cc = new CircleCollider(this, (float)renderer->GetWidth());
+	Scene::PushOnCurrentScene(cc);
+}
+
+AnimationObject::~AnimationObject()
+{
+	SAFE_DELETE(cc);
 }
 
 void AnimationObject::Update()
@@ -41,9 +50,9 @@ void AnimationObject::Update()
 	//InputManager::GetKey~함수를 통해 입력을 체크할 수 있습니다.
 	//4일차 수업 내용을 참고하세요.
 	if (InputManager::GetKeyState(VK_UP))
-		transform->position.y -= moveSpeed * TimeManager::GetDeltaTime();
-	if (InputManager::GetKeyState(VK_DOWN))
 		transform->position.y += moveSpeed * TimeManager::GetDeltaTime();
+	if (InputManager::GetKeyState(VK_DOWN))
+		transform->position.y -= moveSpeed * TimeManager::GetDeltaTime();
 	if (InputManager::GetKeyState(VK_RIGHT))
 		transform->position.x += moveSpeed * TimeManager::GetDeltaTime();
 	if (InputManager::GetKeyState(VK_LEFT))
@@ -55,7 +64,7 @@ void AnimationObject::Update()
 		//다음 Scene으로 변경할 준비를 합니다.
 		//아래와 같은 형태로 호출하여 줍니다.
 		//한번에 ChangeScene을 여러번 호출하지 않도록 주의해 주세요.
-		//Scene::ChangeScene(new GameScene());
+		Scene::ChangeScene(new GameScene());
 	}
 
 	//애니메이션 변경을 담당할 부분입니다.
@@ -73,5 +82,10 @@ void AnimationObject::Update()
 			cur = 0;
 			animationRenderer->ChangeAnimation(0);
 		}
+	}
+
+	if (InputManager::GetKeyDown(VK_LBUTTON) && cc->isMouseOn())
+	{
+		Scene::ChangeScene(new GameScene());
 	}
 }

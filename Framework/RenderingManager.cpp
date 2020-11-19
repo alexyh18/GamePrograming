@@ -3,7 +3,7 @@
 #include "Framework.h"
 
 
-RenderingManager::RenderingManager(D2DApp* d2dApp) :d2dApp(d2dApp), radToEuler(-180.0f/PI)
+RenderingManager::RenderingManager(D2DApp* d2dApp) :d2dApp(d2dApp)
 {
 }
 
@@ -41,138 +41,45 @@ Sprite* RenderingManager::LoadBitmapFromFile(PCWSTR uri, UINT destinationWidth, 
 	}
 }
 
+IDWriteTextFormat* RenderingManager::CreateTextFormat(const WCHAR* fontFamilyName, IDWriteFontCollection* fontCollection, DWRITE_FONT_WEIGHT fontWeight, DWRITE_FONT_STYLE fontStyle, DWRITE_FONT_STRETCH fontStretch, FLOAT fontSize, const WCHAR* localeName)
+{
+	IDWriteTextFormat* temp = nullptr;
+	HRESULT hr = d2dApp->GetDwriteFactory()->CreateTextFormat(
+		fontFamilyName,
+		NULL,
+		fontWeight,
+		fontStyle,
+		fontStretch,
+		fontSize,
+		L"",
+		&temp
+	);
+
+	if (SUCCEEDED(hr))
+		return temp;
+	else
+		return nullptr;
+}
+
+ID2D1SolidColorBrush* RenderingManager::CreateSolidColorBrush(const D2D1_COLOR_F& color)
+{
+	ID2D1SolidColorBrush* temp;
+	HRESULT hr = d2dApp->GetRenderTarget()->CreateSolidColorBrush(
+		color,
+		&temp
+	);
+
+	if (SUCCEEDED(hr))
+		return temp;
+	else
+		return nullptr;
+}
+
 void RenderingManager::BeginRender()
 {
-	screenSize.x = (float)WinApp::GetScreenWidth();
-	screenSize.y = (float)WinApp::GetScreenHeight();
+	screenSize.x = WinApp::GetScreenWidthF();
+	screenSize.y = WinApp::GetScreenHeightF();
 	d2dApp->BeginRender();
-}
-
-//수업 내용에서 수정된 부분입니다.
-void RenderingManager::Render(RenderInfo* renderInfo, Transform* transform)
-{
-	Sprite* currentSprite = renderInfo->GetCurrentSprite();
-	float alpha = renderInfo->GetAlpha();
-	ID2D1HwndRenderTarget* renderTarget = d2dApp->GetRenderTarget();
-
-	if (!renderTarget)
-	{
-		printf("RenderingManger::Render 실패, 렌더타겟이 없습니다.\n");
-		return;
-	}
-
-	if (!currentSprite || !currentSprite->bitmap)
-	{
-		//printf("RenderingManger::Render 실패, 스프라이트가 없습니다.\n");
-		return;
-	}
-
-	renderInfo->UpdateRenderInfo();
-
-	//D2D1_SIZE_U size;
-	//size = currentSprite->bitmap->GetPixelSize();
-	Vector2 size;
-	size.x = (float)renderInfo->GetWidth();
-	size.y = (float)renderInfo->GetHeight();
-
-	Point positioningCenter;
-	positioningCenter.x = transform->position.x - transform->positioningCenter.x;
-	positioningCenter.y = transform->position.y - transform->positioningCenter.y;
-
-	D2D1_RECT_F rect;
-	rect.left = positioningCenter.x - size.x * 0.5f;//* o->scale.x;
-	rect.top = positioningCenter.y - size.y * 0.5f;// *o->scale.y;
-	rect.right = positioningCenter.x + size.x * 0.5f;// *o->scale.x;
-	rect.bottom = positioningCenter.y + size.y * 0.5f;// *o->scale.y;
-
-	D2D1_RECT_F* sourceRect = nullptr;
-	sourceRect = renderInfo->GetSourceRect();
-
-	Point scalingCenter;
-	scalingCenter.x = positioningCenter.x + transform->scalingCenter.x;
-	scalingCenter.y = positioningCenter.y + transform->scalingCenter.y;
-
-	Point rotatingCenter;
-	rotatingCenter.x = positioningCenter.x + transform->rotatingCenter.x;
-	rotatingCenter.y = positioningCenter.y + transform->rotatingCenter.y;
-
-	renderTarget->SetTransform(
-		D2D1::Matrix3x2F::Scale(
-			transform->scale.x,
-			transform->scale.y,
-			scalingCenter)
-		* D2D1::Matrix3x2F::Rotation(
-			transform->rotatingAngle * radToEuler,
-			rotatingCenter
-		));
-	renderTarget->DrawBitmap(currentSprite->bitmap, &rect, alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, sourceRect);
-	
-}
-
-void RenderingManager::Render(RenderInfo* renderInfo, Transform* transform, Vector2 cameraPosition)
-{
-	Sprite* currentSprite = renderInfo->GetCurrentSprite();
-	float alpha = renderInfo->GetAlpha();
-	ID2D1HwndRenderTarget* renderTarget = d2dApp->GetRenderTarget();
-
-	if (!renderTarget)
-	{
-		printf("RenderingManger::Render 실패, 렌더타겟이 없습니다.\n");
-		return;
-	}
-
-	if (!currentSprite || !currentSprite->bitmap)
-	{
-		printf("RenderingManger::Render 실패, 스프라이트가 없습니다.\n");
-		return;
-	}
-
-	renderInfo->UpdateRenderInfo();
-
-	//D2D1_SIZE_U size;
-	//size = currentSprite->bitmap->GetPixelSize();
-	Vector2 size;
-	size.x = (float)renderInfo->GetWidth();
-	size.y = (float)renderInfo->GetHeight();
-
-	Point positioningCenter;
-	positioningCenter.x 
-		= transform->position.x - transform->positioningCenter.x - cameraPosition.x + screenSize.x*0.5f;
-	positioningCenter.y
-		= screenSize.y * 0.5f - transform->position.y + transform->positioningCenter.y + cameraPosition.y;
-	//y축이 아래를 향할경우
-	/*positioningCenter.y
-		= transform->position.y - transform->positioningCenter.y - cameraPosition.y + screenSize.y*0.5f;*/
-
-
-	D2D1_RECT_F rect;
-	rect.left = positioningCenter.x - size.x * 0.5f;//* o->scale.x;
-	rect.top = positioningCenter.y - size.y * 0.5f;// *o->scale.y;
-	rect.right = positioningCenter.x + size.x * 0.5f;// *o->scale.x;
-	rect.bottom = positioningCenter.y + size.y * 0.5f;// *o->scale.y;
-
-	D2D1_RECT_F* sourceRect = nullptr;
-	sourceRect = renderInfo->GetSourceRect();
-
-	Point scalingCenter;
-	scalingCenter.x = positioningCenter.x + transform->scalingCenter.x;
-	scalingCenter.y = positioningCenter.y + transform->scalingCenter.y;
-
-	Point rotatingCenter;
-	rotatingCenter.x = positioningCenter.x + transform->rotatingCenter.x;
-	rotatingCenter.y = positioningCenter.y + transform->rotatingCenter.y;
-
-	renderTarget->SetTransform(
-		D2D1::Matrix3x2F::Scale(
-			transform->scale.x,
-			transform->scale.y,
-			scalingCenter)
-		* D2D1::Matrix3x2F::Rotation(
-			transform->rotatingAngle * radToEuler,
-			rotatingCenter
-		));
-	renderTarget->DrawBitmap(currentSprite->bitmap, &rect, alpha, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, sourceRect);
-
 }
 
 void RenderingManager::EndRender()

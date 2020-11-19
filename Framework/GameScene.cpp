@@ -3,10 +3,17 @@
 
 void GameScene::Initialize()
 {
-	background = new GameObject(L"resources/background.png");
-	Push(background);
+	player1 = new Player();
+	Push(player1);
+	player1->transform->SetPosition(-100, 0);
 
-	player = new Player();
-	Push(player);
+	player2 = new Player2();
+	Push(player2);
+	player2->transform->SetPosition(100, 0);
+
+}
+
+void GameScene::Update()
+{
 
 }

@@ -1,14 +1,15 @@
 #pragma once
 #include "GameObject.h"
-#include "InputManager.h"
-#include "TimeManager.h"
 class Player :
     public GameObject
 {
 public:
-    float moveSpeed;
+    Player();
+    ~Player();
     void Update();
     void Move();
-    Player();
+    float moveSpeed;
+    float moveForce;
+    float maxForce;
 };
 

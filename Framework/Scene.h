@@ -12,7 +12,6 @@ public:
 	virtual ~Scene();
 
 private:
-	static D2DApp* d2dApp;
 	static Scene* currentScene;
 	static Scene* nextScene;
 	static void SwapScene(D2DApp* d2dApp);
@@ -22,14 +21,18 @@ public:
 	static Scene* GetCurrentScene();
 
 	static void Destroy(GameObject* gameObject);
-	static void PushOnCurrentScene(GameObject* gameObject);
-	static void PushOnCurrentScene(AABBCollider* col);
+	static GameObject* PushOnCurrentScene(GameObject* gameObject);
+	static GameObject* PushUIOnCurrentScene(GameObject* gameObject);
+	static AABBCollider* PushOnCurrentScene(AABBCollider* col);
+	static CircleCollider* PushOnCurrentScene(CircleCollider* col);
 
 private:
+	D2DApp* d2dApp;
 	Camera* camera;
 	std::list<GameObject*> renderableList;
 	std::list<GameObject*> gameObjectList;
 	std::list<GameObject*> destroyedObjectList;
+	std::list<GameObject*> uiList;
 	RenderingManager* renderingManager;
 	CollisionManager* collisionManager;
 
@@ -42,6 +45,9 @@ private:
 
 public:
 	GameObject* Push(GameObject* gameObject);
+	GameObject* PushUI(GameObject* gameObject);
+	AABBCollider* Push(AABBCollider* col);
+	CircleCollider* Push(CircleCollider* col);
 	//void Destroy(GameObject* o);
 
 public:
